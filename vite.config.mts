@@ -61,7 +61,14 @@ if (process.env.SW === 'true') {
 if (claims) pwaOptions.registerType = 'autoUpdate';
 
 // https://vitejs.dev/config/
-export default defineConfig({
+export default defineConfig(({ command }) => {
+  // 判断是否为生产环境构建
+  const isProd = command === 'build';
+  
+  return {
+    // 根据环境动态设置基础路径
+    // base: isProd ? 'https://mybox-1257251314.cos.ap-chengdu.myqcloud.com/www/test/bot/' : '/',
+    base: '/',
     resolve: {
         alias: {
             '@': path.resolve(__dirname, 'src'),
@@ -74,6 +81,20 @@ export default defineConfig({
             output: {
                 // 入口文件名（不能变，否则所有打包的 js hash 值全变了）
                 entryFileNames: 'index.js',
+                // 配置CDN路径前缀
+                assetFileNames: (assetInfo) => {
+                    const info = assetInfo.name.split('.');
+                    let extType = info[info.length - 1];
+                    if (/\.(mp4|webm|ogg|mp3|wav|flac|aac)(\?.*)?$/i.test(assetInfo.name)) {
+                        extType = 'media';
+                    } else if (/\.(png|jpe?g|gif|svg|ico|webp)(\?.*)?$/i.test(assetInfo.name)) {
+                        extType = 'img';
+                    } else if (/\.(woff2?|eot|ttf|otf)(\?.*)?$/i.test(assetInfo.name)) {
+                        extType = 'fonts';
+                    }
+                    return `${extType}/[name]-[hash][extname]`;
+                },
+                chunkFileNames: 'js/[name]-[hash].js',
                 manualChunks: {
                     vue: ['vue', 'pinia', 'vue-router'],
                     elementplus: ['element-plus', '@element-plus/icons-vue'],
@@ -135,8 +156,15 @@ export default defineConfig({
         VueDevTools(),
     ],
     server: {
-        port: 8080,
+        port: 9000,
         host: '127.0.0.1',
+        proxy: {
+            '/api': {
+                target: 'http://b18080.roginx.ink/',
+                changeOrigin: true,
+                rewrite: (path) => path.replace(/^\/api/, ''),
+            }, 
+        }
     },
 
     // https://github.com/vitest-dev/vitest
@@ -149,4 +177,4 @@ export default defineConfig({
             },
         },
     },
-});
+}});

@@ -1,5 +1,6 @@
 /* @tailwind base; */
 @import './reset';
+@import './variables.scss';
 
 a,
 a:active,
@@ -9,4 +10,13 @@ a:visited {
 
 :root {
     --link-color: #42b983;
+}
+
+body {
+    font-family: var(--globalFont);
+}
+
+// 应用到所有元素
+* {
+    font-family: var(--globalFont);
 }

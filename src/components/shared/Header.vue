@@ -41,7 +41,7 @@ const { t } = useI18n();
 .nav-left {
     position: absolute;
     top: 12px;
-    left: 20px;
+    left: 0px;
 }
 
 .logo {
