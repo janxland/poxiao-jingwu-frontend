@@ -632,46 +632,59 @@ function submitFiles(type: 'json' | 'suspect' | 'common') {
 
 async function uploadMinio(files, type) {
   try {
-    // 创建一个数组存储所有上传任务
-    const uploadTasks = files.map(async (file) => {
-      const formData = new FormData();
-      formData.append('file', file.raw);
-      formData.append('type', getSelectedFileTypeApiValue());
-      
-      // 创建单个文件的上传任务
+    // 创建文件上传任务数组，但不立即执行
+    const uploadTasks = files.map(file => {
       return {
         fileName: file.name,
-        uploadPromise: service.post('/uploadfile/api/upload', formData)
+        file: file.raw,
+        type: getSelectedFileTypeApiValue()
       };
     });
 
-    // 使用Promise.allSettled并行执行所有上传任务
-    const results = await Promise.allSettled(uploadTasks.map(async (task) => {
+    const results = [];
+    // 按顺序一个个上传文件
+    for (const task of uploadTasks) {
       try {
-        const response = await task.uploadPromise;
-        if (!response || response.code !== 200) {
-          // throw new Error(`文件 ${task.fileName} 上传失败`);
-        }
-        return {
-          fileName: task.fileName,
-          response
-        };
+        const formData = new FormData();
+        formData.append('file', task.file);
+        formData.append('type', task.type);
+        
+        // 执行单个文件上传
+        const response = await service.post('/uploadfile/api/upload', formData);
+        
+        results.push({
+          status: 'fulfilled',
+          value: {
+            fileName: task.fileName,
+            response
+          }
+        });
+        
+        // 每个文件上传成功后显示进度提示
+        ElMessage.info(`文件 ${task.fileName} 上传完成`);
+        
       } catch (error) {
-        throw {
-          fileName: task.fileName,
-          error: error.message
-        };
+        results.push({
+          status: 'rejected',
+          reason: {
+            fileName: task.fileName,
+            error: error.message || '上传失败'
+          }
+        });
+        
+        // 显示单个文件上传失败的提示
+        ElMessage.warning(`文件 ${task.fileName} 上传失败`);
       }
-    }));
+    }
 
     // 分析上传结果
     const successUploads = results.filter(r => r.status === 'fulfilled');
-    const failedUploads = results.filter(r => r.status === 'rejected').map(r => r.reason);
+    const failedUploads = results.filter(r => r.status === 'rejected');
 
     // 生成详细的上传报告
     if (failedUploads.length > 0) {
-      const failureDetails = failedUploads.map(f => f.fileName).join(', ');
-      // ElMessage.warning(`上传结果: ${successUploads.length}个成功, ${failedUploads.length}个失败\n失败文件: ${failureDetails}`);
+      const failureDetails = failedUploads.map(f => f.reason.fileName).join(', ');
+      ElMessage.warning(`上传结果: ${successUploads.length}个成功, ${failedUploads.length}个失败`);
     } else {
       ElMessage.success(`所有${files.length}个文件上传成功`);
     }

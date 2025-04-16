@@ -128,6 +128,7 @@ import { ref, onMounted, computed } from 'vue';
 import { ElMessage, ElMessageBox, ElLoading } from 'element-plus';
 import { Search, Refresh } from '@element-plus/icons-vue';
 import { service } from '@/api'; // 导入axios实例
+import { fetchKnowledgeFiles, deleteKnowledgeFile } from '@/api/modules/knowledgeBase'; // 导入API函数
 
 // ========== 历史记录相关 ==========
 const historyRecords = ref([]);
@@ -166,26 +167,51 @@ function getFileTypeTagType(fileType) {
   return 'info';
 }
 
+// 检查是否启用了模拟数据
+const isMockEnabled = import.meta.env.VITE_ENABLE_MOCK === 'true';
+console.log('是否启用模拟数据:', isMockEnabled);
+
 // 获取历史记录
 async function fetchHistoryRecords() {
   historyLoading.value = true;
   try {
-    // 从后端获取数据
-    const response = await service.get('/uploadfile/api/filelist', {
-      params: {
+    let response;
+    
+    if (isMockEnabled) {
+      // 使用模拟数据 API - 通过 knowledgeBase 模块函数调用
+      response = await fetchKnowledgeFiles({
         page: currentPage.value,
         pageSize: pageSize.value,
         keyword: searchKeyword.value
+      });
+      
+      console.log('模拟数据响应:', response);
+      
+      // 处理模拟数据的响应格式
+      if (response && response.code === 200) {
+        historyRecords.value = response.data.list || [];
+        total.value = response.data.total || 0;
+      } else {
+        ElMessage.error('获取文件列表失败');
       }
-    });
-    console.log(response.data);
+    } else {
+      // 使用真实后端 API
+      response = await service.get('/uploadfile/api/filelist', {
+        params: {
+          page: currentPage.value,
+          pageSize: pageSize.value,
+          keyword: searchKeyword.value
+        }
+      });
+      
+      historyRecords.value = response.data || [];
+      total.value = historyRecords.value.length;
+    }
     
-    historyRecords.value = response.data || [];
-    total.value = historyRecords.value.length;
-  
+    console.log('文件列表数据:', response);
   } catch (error) {
     ElMessage.error('获取文件列表失败');
-    console.error(error);
+    console.error('获取文件列表错误:', error);
   } finally {
     historyLoading.value = false;
   }
@@ -228,20 +254,34 @@ function deleteHistoryRecord(record) {
         background: 'rgba(255, 255, 255, 0.7)'
       });
       try {
-        // 修改为新的删除接口
-        const response = await service.delete('uploadfile/api/delMinioFile', {
-          params: { fileName: record.fileName }
-        });
+        let response;
         
-        if (response.status === 200) {
-          fetchHistoryRecords();
-          ElMessage.success('删除成功');
+        if (isMockEnabled) {
+          // 使用模拟数据 API - 通过 knowledgeBase 模块函数调用
+          response = await deleteKnowledgeFile(record.id);
+          
+          if (response && response.code === 200) {
+            fetchHistoryRecords();
+            ElMessage.success(response.message || '删除成功');
+          } else {
+            ElMessage.error(response.message || '删除失败');
+          }
         } else {
-          ElMessage.error('删除失败');
+          // 使用真实后端 API
+          response = await service.delete('uploadfile/api/delMinioFile', {
+            params: { fileName: record.fileName }
+          });
+          
+          if (response.code == 200) {
+            fetchHistoryRecords();
+            ElMessage.success('删除成功');
+          } else {
+            ElMessage.error('删除失败');
+          }
         }
       } catch (error) {
         ElMessage.error('删除失败');
-        console.error(error);
+        console.error('删除文件错误:', error);
       } finally {
         loadingInstance.close();
       }
@@ -259,18 +299,32 @@ async function viewFileDetails(record) {
   if (isPreviewableFile(record.fileName)) {
     fileContentLoading.value = true;
     try {
-      // 修改为新的预览接口
-      const response = await service.get('/uploadfile/api/getFile', {
-        params: { 
-          fileName: record.fileName,
-          download: false
-        }
-      });
+      let response;
       
-      if (response) {
-        fileContent.value = JSON.stringify(response);
+      if (isMockEnabled) {
+        // 模拟文件内容
+        response = {
+          data: {
+            content: `这是 ${record.fileName} 的模拟内容。\n这是一个使用 Mock 数据生成的文件预览。`,
+            type: getFileType(record.fileName)
+          }
+        };
+        
+        fileContent.value = JSON.stringify(response.data);
       } else {
-        ElMessage.warning('无法加载文件内容');
+        // 使用真实后端 API
+        response = await service.get('/uploadfile/api/getFile', {
+          params: { 
+            fileName: record.fileName,
+            download: false
+          }
+        });
+        
+        if (response) {
+          fileContent.value = JSON.stringify(response);
+        } else {
+          ElMessage.warning('无法加载文件内容');
+        }
       }
     } catch (error) {
       ElMessage.warning('无法加载文件内容');
@@ -279,6 +333,12 @@ async function viewFileDetails(record) {
       fileContentLoading.value = false;
     }
   }
+}
+
+// 获取文件类型
+function getFileType(fileName) {
+  const ext = fileName.split('.').pop().toLowerCase();
+  return ext;
 }
 
 // 判断文件是否可预览
@@ -310,7 +370,16 @@ async function downloadFile(file) {
   });
   
   try {
-    // 修改为新的下载接口
+    if (isMockEnabled) {
+      // 模拟下载
+      setTimeout(() => {
+        ElMessage.success('模拟环境下，文件下载模拟成功');
+        loadingInstance.close();
+      }, 1000);
+      return;
+    }
+    
+    // 使用真实后端 API
     const response = await service.get('/uploadfile/api/getFile', {
       params: { 
         fileName: file.fileName,
@@ -439,6 +508,7 @@ defineExpose({
 }
 
 .preview-content {
+  text-align: left;
   pre {
     margin: 0;
     white-space: pre-wrap;

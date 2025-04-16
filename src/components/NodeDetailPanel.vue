@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
-import { ElButton, ElTabs, ElTabPane, ElTag, ElDivider, ElEmpty } from 'element-plus'
+import { ElButton, ElTabs, ElTabPane, ElTag, ElDivider, ElEmpty, ElTooltip } from 'element-plus'
 
 // 定义属性
 const props = defineProps({
@@ -166,7 +166,7 @@ const formatValue = (key, value) => {
   }
   
   // 处理数字
-  if (key.includes('frequency') || (key.includes('count') && key!='network_account_id')) {
+  if (key.includes('frequency') || (key.includes('count') && !key.includes('account'))) {
     return value.toString() + ' 次'
   }
   
@@ -212,12 +212,56 @@ const parseJsonString = (value) => {
     return {}
   }
 }
+
+// 获取格式化后的完整值（用于tooltip显示）
+const getFullValue = (key, value) => {
+  if (value == "" || value === null || value === undefined) return '无'
+  
+  // 处理布尔值
+  if (typeof value === 'boolean') {
+    return value ? '是' : '否'
+  }
+  
+  // 处理数组
+  if (Array.isArray(value)) {
+    if (value.length === 0) return '无'
+    return value.join(', ')
+  }
+  
+  // 处理对象或JSON字符串
+  if (isObject(value)) {
+    return JSON.stringify(value, null, 2)
+  }
+  
+  if (isJsonString(value)) {
+    try {
+      const obj = JSON.parse(value)
+      return JSON.stringify(obj, null, 2)
+    } catch (e) {
+      return value
+    }
+  }
+  
+  // 处理数字
+  if (key.includes('frequency') || (key.includes('count') && key!='network_account_id')) {
+    return value.toString() + ' 次'
+  }
+  
+  if (key.includes('duration')) {
+    return value.toString() + ' 分钟'
+  }
+  
+  return value.toString()
+}
 </script>
 
 <template>
   <div class="node-detail-panel" v-if="visible">
     <div class="panel-header">
-      <h3 class="panel-title">{{ node?.name || '节点详情' }}</h3>
+      <!-- 为标题添加tooltip -->
+      <el-tooltip :content="node?.name || '节点详情'" placement="top" :disabled="!node?.name || node.name.length < 15">
+        <h3 class="panel-title">{{ node?.name || '节点详情' }}</h3>
+      </el-tooltip>
       <div class="panel-actions">
         <el-button type="primary" size="small" @click="$emit('back-to-graph')">
           返回图谱
@@ -240,47 +284,73 @@ const parseJsonString = (value) => {
           >
             <div class="info-section">
               <div v-for="field in fieldGroups[tab.name]" :key="field" class="info-item">
-                <span class="info-label">{{ fieldTranslations[field] || field }}:</span>
+                <!-- 为字段标签添加tooltip -->
+                <el-tooltip :content="fieldTranslations[field] || field" placement="top" :disabled="(fieldTranslations[field] || field).length < 10">
+                  <span class="info-label">{{ fieldTranslations[field] || field }}:</span>
+                </el-tooltip>
                 
                 <!-- 数组类型值 -->
                 <div v-if="isArray(node[field])" class="info-value tag-container">
-                  <el-tag 
+                  <el-tooltip 
                     v-for="(item, index) in node[field]" 
                     :key="index"
-                    :color="getColorForRelation(item.toString())"
-                    class="tag-item"
+                    :content="item.toString()"
+                    placement="top"
+                    :disabled="item.toString().length < 15"
                   >
-                    {{ item }}
-                  </el-tag>
+                    <el-tag 
+                      :color="getColorForRelation(item.toString())"
+                      class="tag-item"
+                    >
+                      {{ item }}
+                    </el-tag>
+                  </el-tooltip>
                   <span v-if="node[field].length === 0">无</span>
                 </div>
                 
                 <!-- 对象类型值 -->
                 <div v-else-if="isObject(node[field])" class="info-value tag-container">
-                  <el-tag 
+                  <el-tooltip 
                     v-for="(val, key) in node[field]" 
                     :key="key"
-                    :color="getColorForRelation(key)"
-                    class="tag-item"
+                    :content="`${key}: ${isSimpleValue(val) ? val : JSON.stringify(val)}`"
+                    placement="top"
                   >
-                    {{ key }}: {{ isSimpleValue(val) ? val : '复杂对象' }}
-                  </el-tag>
+                    <el-tag 
+                      :color="getColorForRelation(key)"
+                      class="tag-item"
+                    >
+                      {{ key }}: {{ isSimpleValue(val) ? val : '复杂对象' }}
+                    </el-tag>
+                  </el-tooltip>
                 </div>
                 
                 <!-- JSON字符串值 -->
                 <div v-else-if="isJsonString(node[field])" class="info-value tag-container">
-                  <el-tag 
+                  <el-tooltip 
                     v-for="(val, key) in parseJsonString(node[field])" 
                     :key="key"
-                    :color="getColorForRelation(key)"
-                    class="tag-item"
+                    :content="`${key}: ${isSimpleValue(val) ? val : JSON.stringify(val)}`"
+                    placement="top"
                   >
-                    {{ key }}: {{ isSimpleValue(val) ? val : '复杂对象' }}
-                  </el-tag>
+                    <el-tag 
+                      :color="getColorForRelation(key)"
+                      class="tag-item"
+                    >
+                      {{ key }}: {{ isSimpleValue(val) ? val : '复杂对象' }}
+                    </el-tag>
+                  </el-tooltip>
                 </div>
                 
                 <!-- 简单类型值 -->
-                <span v-else class="info-value">{{ formatValue(field, node[field]) }}</span>
+                <el-tooltip 
+                  v-else 
+                  :content="getFullValue(field, node[field])" 
+                  placement="top" 
+                  :disabled="formatValue(field, node[field]).length < 20"
+                >
+                  <span class="info-value">{{ formatValue(field, node[field]) }}</span>
+                </el-tooltip>
               </div>
             </div>
           </el-tab-pane>
@@ -315,6 +385,10 @@ const parseJsonString = (value) => {
   margin: 0;
   font-size: 18px;
   font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 250px; /* 限制标题宽度 */
 }
 
 .panel-actions {
@@ -336,9 +410,7 @@ const parseJsonString = (value) => {
 .info-item {
   display: flex;
   margin-bottom: 8px;
-  white-space: nowrap;
   overflow: hidden;
-  text-overflow: ellipsis;
   align-items: flex-start;
 }
 
@@ -349,8 +421,8 @@ const parseJsonString = (value) => {
   text-overflow: ellipsis;
   font-weight: 500;
   color: #606266;
+  line-height: 20px;
   flex-shrink: 0;
-  padding-top: 4px;
 }
 
 .info-value {
@@ -359,6 +431,9 @@ const parseJsonString = (value) => {
   word-break: break-all;
   display: flex;
   align-items: center;
+  overflow: hidden;
+  line-height: 20px;
+  text-overflow: ellipsis;
 }
 
 /* 新增样式 */
@@ -373,5 +448,8 @@ const parseJsonString = (value) => {
   margin-bottom: 4px;
   color: #333 !important;
   white-space: nowrap;
+  max-width: 250px; /* 限制标签宽度 */
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 </style>

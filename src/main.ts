@@ -33,6 +33,16 @@ function loadFont() {
   }
 }
 
+// 在其他导入之后添加
+import { setupMockInterceptor } from './api/mock/mockInterceptor'
+import axios from 'axios'
+
+// 在创建应用之前设置 mock 拦截器
+if (import.meta.env.VITE_ENABLE_MOCK === 'true') {
+  console.log('启用模拟数据')
+  setupMockInterceptor(axios)
+}
+
 async function main() {
     // 加载字体
     loadFont();

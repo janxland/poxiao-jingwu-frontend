@@ -67,15 +67,15 @@ export default defineConfig(({ command }) => {
   
   return {
     // 根据环境动态设置基础路径
-    // base: isProd ? 'https://mybox-1257251314.cos.ap-chengdu.myqcloud.com/www/test/bot/' : '/',
-    base: '/',
+    base: isProd ? 'https://mybox-1257251314.cos.ap-chengdu.myqcloud.com/www/test/bot/' : '/',
+    // base: '/',
     resolve: {
         alias: {
             '@': path.resolve(__dirname, 'src'),
         },
     },
     build: {
-        target: 'es2015',
+        target: 'es2020',
         cssTarget: 'chrome80',
         rollupOptions: {
             output: {
@@ -160,7 +160,7 @@ export default defineConfig(({ command }) => {
         host: '127.0.0.1',
         proxy: {
             '/api': {
-                target: 'http://b18080.roginx.ink/',
+                target:  process.env.VITE_BACKEND_URL || 'http://b18080.roginx.ink/',
                 changeOrigin: true,
                 rewrite: (path) => path.replace(/^\/api/, ''),
             }, 

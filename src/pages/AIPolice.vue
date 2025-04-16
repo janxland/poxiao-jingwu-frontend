@@ -1,54 +1,48 @@
 <script setup lang="ts">
 import { useRoute } from 'vue-router';
 import { computed } from 'vue';
+import { aiPoliceAssistants, getFullPath } from '@/config/aiAssistants';
+import { Document, Reading, DocumentChecked, ChatLineRound, Money, MapLocation, Upload } from '@element-plus/icons-vue';
 
 const route = useRoute();
 
-// 定义AI警察功能列表
-const aiPoliceModules = [
-  {
-    title: '案情审查助手',
-    desc: '智能分析案情要点，提炼关键信息',
-    icon: 'el-icon-document',
-    path: '/ai-police/case-review',
-    color: '#1890ff'
-  },
-  {
-    title: '法律咨询助手',
-    desc: '快速查询相关法律条文和解释',
-    icon: 'el-icon-reading',
-    path: '/ai-police/legal-consultant',
-    color: '#52c41a'
-  },
-  {
-    title: '文件检察官',
-    desc: '文档合规性智能检查',
-    icon: 'el-icon-document-checked',
-    path: '/ai-police/text-review',
-    color: '#722ed1'
-  },
-  {
-    title: '通信记录挖掘助手',
-    desc: '智能分析通讯记录中的异常',
-    icon: 'el-icon-money',
-    path: '/ai-police/chat-review',
-    color: '#13c2c2'
-  },
-  {
-    title: '案件异常资金分析',
-    desc: '智能分析资金流向和异常',
-    icon: 'el-icon-money',
-    path: '/ai-police/financial-analysis',
-    color: '#13c2c2'
-  },
-  {
-    title: '案件社会活动轨迹',
-    desc: '分析社会活动轨迹特征',
-    icon: 'el-icon-map-location',
-    path: '/ai-police/social-activity',
-    color: '#eb2f96'
-  }
-];
+// 图标映射
+const iconMap = {
+  'case-review': Document,
+  'legal-consultant': Reading,
+  'text-review': DocumentChecked,
+  'chat-review': ChatLineRound,
+  'financial-analysis': Money,
+  'social-activity': MapLocation,
+  'social-activity-assistant': Upload,
+  'chat-review-file': Upload,
+  'financial-analysis-tool': Upload
+};
+
+// 颜色映射
+const colorMap = {
+  'case-review': '#1890ff',
+  'legal-consultant': '#52c41a',
+  'text-review': '#722ed1',
+  'chat-review': '#13c2c2',
+  'financial-analysis': '#fa8c16',
+  'social-activity': '#eb2f96',
+  'social-activity-assistant': '#eb2f96',
+  'chat-review-file': '#13c2c2',
+  'financial-analysis-tool': '#fa8c16'
+};
+
+// 从aiAssistants动态生成模块列表
+const aiPoliceModules = computed(() => {
+  return aiPoliceAssistants.map(assistant => ({
+    title: assistant.title,
+    desc: assistant.description,
+    icon: iconMap[assistant.path] || Document,
+    path: getFullPath(assistant.path),
+    color: colorMap[assistant.path] || '#1890ff',
+    isFileUpload: assistant.isFileUpload
+  }));
+});
 
 // 判断是否显示模块列表
 const showModuleList = computed(() => {
@@ -60,6 +54,9 @@ const showModuleList = computed(() => {
   <div class="page-container">
     <div class="content-wrapper">
       <div class="module-list" v-if="showModuleList">
+        <h1 class="page-title">AI警察系统</h1>
+        <p class="page-description">选择下方功能模块，开始智能辅助办案</p>
+        
         <div class="module-grid">
           <el-card
             v-for="module in aiPoliceModules"
@@ -70,9 +67,14 @@ const showModuleList = computed(() => {
             @click="$router.push(module.path)"
           >
             <div class="module-content" :style="{ borderTopColor: module.color }">
-              <el-icon :style="{ color: module.color }">
-                <component :is="module.icon" />
-              </el-icon>
+              <div class="icon-container" :style="{ backgroundColor: `${module.color}15` }">
+                <el-icon :style="{ color: module.color }">
+                  <component :is="module.icon" />
+                </el-icon>
+                <div v-if="module.isFileUpload" class="upload-badge">
+                  <el-icon><Upload /></el-icon>
+                </div>
+              </div>
               <h3>{{ module.title }}</h3>
               <p>{{ module.desc }}</p>
             </div>
@@ -86,14 +88,32 @@ const showModuleList = computed(() => {
 
 <style lang="scss" scoped>
 .page-container {
-
+  background-color: #f5f7fa;
+  min-height: 100vh;
 }
+
+.page-title {
+  font-size: 28px;
+  font-weight: 600;
+  color: #1f1f1f;
+  margin-bottom: 8px;
+  text-align: center;
+}
+
+.page-description {
+  font-size: 16px;
+  color: #666;
+  margin-bottom: 32px;
+  text-align: center;
+}
+
 .module-list {
-  padding: 24px;
+  padding: 32px;
   max-width: 1200px;
   min-height: 100vh;
   margin: 0 auto;
 }
+
 .content-wrapper {
   margin: 0 auto;
 }
@@ -108,9 +128,12 @@ const showModuleList = computed(() => {
 .module-card {
   cursor: pointer;
   transition: all 0.3s;
+  border-radius: 8px;
+  overflow: hidden;
   
   &:hover {
     transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
   }
 }
 
@@ -118,10 +141,40 @@ const showModuleList = computed(() => {
   padding: 24px;
   text-align: center;
   border-top: 3px solid;
+  background-color: #fff;
   
-  .el-icon {
-    font-size: 48px;
-    margin-bottom: 16px;
+  .icon-container {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 20px;
+    position: relative;
+    
+    .el-icon {
+      font-size: 36px;
+    }
+    
+    .upload-badge {
+      position: absolute;
+      bottom: 0;
+      right: 0;
+      background-color: #1890ff;
+      color: white;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      
+      .el-icon {
+        font-size: 14px;
+      }
+    }
   }
   
   h3 {
@@ -134,6 +187,11 @@ const showModuleList = computed(() => {
     color: #666;
     font-size: 14px;
     line-height: 1.5;
+    height: 42px;
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
   }
 }
 </style>

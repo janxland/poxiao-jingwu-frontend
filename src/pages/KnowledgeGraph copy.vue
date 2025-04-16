@@ -7,6 +7,9 @@ import NodeContextMenu from '@/components/NodeContextMenu.vue'
 import GraphFilters from '@/components/GraphFilters.vue'
 import NodeDetailContainer from '@/components/NodeDetailContainer.vue'
 
+// 检查是否启用了模拟数据
+const isMockEnabled = import.meta.env.VITE_ENABLE_MOCK === 'true'
+
 const ROLES = ['suspect', 'victim', 'witness', 'neutral'] as const
 
 function getColorForRelation(str: string): string {
@@ -275,12 +278,6 @@ const generateFilterConfigs = (nodes: GraphNode[], edges: GraphLink[]) => {
   })
 }
 
-// 查询数据
-const queryData = reactive({
-  belongPhone: '',
-  conditions: []
-})
-
 function replaceNullWithEmpty(obj) {
   return Object.fromEntries(
     Object.entries(obj).map(([key, value]) => [
@@ -290,35 +287,52 @@ function replaceNullWithEmpty(obj) {
   )
 }
 
+// 查询参数
+const queryParams = ref({
+  belongPhone: ''
+})
+
 onMounted(async () => {
-  // 初始化查询条件
-  queryData.conditions = [
-    { type: 'belongPhone', value: queryData.belongPhone, id: Date.now() }
-  ]
-  
-  await getGraphyDataByPhone()
+  // 如果启用了模拟数据，自动加载图谱数据
+  if (isMockEnabled) {
+    await getGraphyDataByPhone()
+  }
 })
 
 // 获取图数据
 const getGraphyDataByPhone = async () => {
   try {
-    // 构建查询参数
-    const queryParams = {}
-    console.log("当前查询条件：", queryData);
+    // 创建一个新对象，确保使用最新的查询参数
+    const currentParams = {...queryParams.value}
+    console.log("这里是最终查询", currentParams);
     
-    // 添加查询条件
-    if (queryData.conditions && queryData.conditions.length > 0) {
-      queryData.conditions.forEach(condition => {
-        if (condition.value && condition.type) {
-          queryParams[condition.type] = condition.value
-        }
-      })
-    } else if (queryData.belongPhone) {
-      // 兼容旧版本，如果没有条件但有手机号
-      queryParams.belongPhone = queryData.belongPhone
+    let data
+    
+    // 根据环境变量决定是否使用模拟数据
+    if (isMockEnabled) {
+      console.log('使用模拟数据')
+      // 使用模拟数据 - 修改这部分代码
+      try {
+        // 直接从 API 获取模拟数据
+        const response = await fetch('/api/knowledge-graph/data')
+        const result = await response.json()
+        data = result.data
+      } catch (error) {
+        console.error('获取模拟数据失败，尝试直接导入模拟数据', error)
+        // 如果 fetch 失败，直接导入模拟数据
+        const { default: mockModule } = await import('@/api/mock/modules/knowledgeGraph')
+        // 获取 frontendGraphData
+        const frontendGraphData = mockModule.getFrontendGraphData ? 
+          mockModule.getFrontendGraphData() : 
+          convertToFrontendFormat(mockModule.generateRandomGraphData(50, 100))
+        data = frontendGraphData
+      }
+    } else {
+      // 使用真实 API
+      const result = await fetchGraphData(currentParams)
+      data = result.data
     }
     
-    const { data } = await fetchGraphData(queryParams)
     const { nodes = [], edges = [] } = (data || {}) as {
       nodes?: Partial<GraphNode>[]
       edges?: Partial<GraphLink>[]
@@ -464,7 +478,7 @@ watch(filterValues, () => {
   <div class="knowledge-graph">
     <!-- 过滤器组件 -->
     <GraphFilters
-      v-model:queryData="queryData"
+      v-model:queryParams="queryParams"
       v-model:timeRange="timeRange"
       v-model:riskLevel="riskLevel"
       v-model:frequency="frequency"

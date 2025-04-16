@@ -1,412 +1,437 @@
 import { MockAdapter } from 'axios-mock-adapter';
+import { faker } from '@faker-js/faker';
 
-// 模拟知识图谱数据
-const mockGraphData = {
-  nodes: [
-    {
-      id: "eb5925371be58caaaca53e1bedcb6afe",
-      name: "七星海-空蛋油杆/群上粉",
-      label: "{\"network_account_id\":\"user7157202858\"}",
-      belongName: "test",
-      belongPhone: "1111",
-      gender: "未知",
-      age: null,
-      place_of_origin: null,
-      zodiac: null,
-      education: null,
-      id_number: null,
-      phone: null,
-      network_account_id: "user7157202858",
-      nicknames: ["七星海"],
-      permanent_address: null,
-      temporary_address: null,
-      illegal_risks: [
-        "2025-03-22T14:11:44，讨论电子烟燃料交易",
-        "2025-03-22T20:28:02，涉及广告删除争议"
-      ],
-      consumption_level: null,
-      has_car: null,
-      has_house: null,
-      has_loan: null,
-      loan_types: [],
-      transaction_count: null,
-      expenditure_frequency: null,
-      transaction_categories: [],
-      overdue_record_count: null,
-      abnormal_transaction_count: null,
-      sleep_pattern: null,
-      common_transport: [],
-      travel_frequency: null,
-      mobility: null,
-      lodging_frequency: null,
-      common_lodging: [],
-      shopping_habits: null,
-      payment_method: null,
-      entertainment_preferences: [],
-      communication_frequency: 13,
-      channels_usage: "{\"微信\":13}",
-      total_duration: null,
-      average_duration: null,
-      sensitive_keywords: ["空蛋油杆", "群上粉"],
-      active_duration: "持续活跃",
-      active_periods: ["夜间"],
-      interaction_topics: ["电子烟设备交易", "群管理"]
-    },
-    {
-      id: "fda5a69cfbb7e2fd1e472791ba1615da",
-      name: "电子烟销售-老王",
-      label: "{\"network_account_id\":\"user8823456789\"}",
-      belongName: "test",
-      belongPhone: "1111",
-      gender: "男",
-      age: "35",
-      place_of_origin: "广东",
-      zodiac: "天蝎座",
-      education: "大专",
-      id_number: null,
-      phone: "13812345678",
-      network_account_id: "user8823456789",
-      nicknames: ["老王", "烟王"],
-      permanent_address: "广东省深圳市南山区",
-      temporary_address: null,
-      illegal_risks: [
-        "2025-03-20T09:15:22，组织非法电子烟销售",
-        "2025-03-23T16:42:10，讨论规避监管方式"
-      ],
-      consumption_level: "12万元",
-      has_car: true,
-      has_house: true,
-      has_loan: false,
-      loan_types: [],
-      transaction_count: 156,
-      expenditure_frequency: "频繁",
-      transaction_categories: ["电子设备", "餐饮", "娱乐"],
-      overdue_record_count: 0,
-      abnormal_transaction_count: 3,
-      sleep_pattern: "23:00-07:00",
-      common_transport: ["私家车"],
-      travel_frequency: 8,
-      mobility: "固定",
-      lodging_frequency: 2,
-      common_lodging: ["深圳湾大酒店"],
-      shopping_habits: "线下为主",
-      payment_method: "微信支付",
-      entertainment_preferences: ["KTV", "酒吧"],
-      communication_frequency: 45,
-      channels_usage: "{\"微信\":35,\"电话\":10}",
-      total_duration: 1200,
-      average_duration: 15,
-      sensitive_keywords: ["货源", "批发", "进货"],
-      active_duration: "全天",
-      active_periods: ["上午", "晚间"],
-      interaction_topics: ["电子烟销售", "货源采购", "价格谈判"]
-    },
-    {
-      id: "9c380b33883395b979817bfb020b2c0d",
-      name: "魔叶-电子烟品牌",
-      label: "{\"network_account_id\":\"moye_official\"}",
-      belongName: "test",
-      belongPhone: "1111",
-      gender: "未知",
-      age: null,
-      place_of_origin: null,
-      zodiac: null,
-      education: null,
-      id_number: null,
-      phone: "4008123456",
-      network_account_id: "moye_official",
-      nicknames: ["魔叶", "MoYe"],
-      permanent_address: "广东省深圳市龙华区",
-      temporary_address: null,
-      illegal_risks: [],
-      consumption_level: null,
-      has_car: null,
-      has_house: null,
-      has_loan: null,
-      loan_types: [],
-      transaction_count: null,
-      expenditure_frequency: null,
-      transaction_categories: [],
-      overdue_record_count: null,
-      abnormal_transaction_count: null,
-      sleep_pattern: null,
-      common_transport: [],
-      travel_frequency: null,
-      mobility: null,
-      lodging_frequency: null,
-      common_lodging: [],
-      shopping_habits: null,
-      payment_method: null,
-      entertainment_preferences: [],
-      communication_frequency: 5,
-      channels_usage: "{\"微信\":5}",
-      total_duration: null,
-      average_duration: null,
-      sensitive_keywords: ["电子烟", "官方"],
-      active_duration: "工作时间",
-      active_periods: ["白天"],
-      interaction_topics: ["产品咨询", "售后服务"]
-    },
-    {
-      id: "2242a380e5bc603a411869a74b4eb09b",
-      name: "小李-批发商",
-      label: "{\"network_account_id\":\"user9987654321\"}",
-      belongName: "test",
-      belongPhone: "1111",
-      gender: "男",
-      age: "28",
-      place_of_origin: "湖北",
-      zodiac: "双子座",
-      education: "本科",
-      id_number: null,
-      phone: "13987654321",
-      network_account_id: "user9987654321",
-      nicknames: ["小李", "李哥"],
-      permanent_address: "广东省广州市白云区",
-      temporary_address: null,
-      illegal_risks: [
-        "2025-03-25T11:30:15，涉嫌非法交易电子烟",
-        "2025-03-26T14:22:33，与他人发生财物纠纷"
-      ],
-      consumption_level: "8万元",
-      has_car: true,
-      has_house: false,
-      has_loan: true,
-      loan_types: ["经营贷款"],
-      transaction_count: 98,
-      expenditure_frequency: "中等",
-      transaction_categories: ["电子设备", "交通", "餐饮"],
-      overdue_record_count: 1,
-      abnormal_transaction_count: 2,
-      sleep_pattern: "01:00-09:00",
-      common_transport: ["私家车", "高铁"],
-      travel_frequency: 12,
-      mobility: "流动",
-      lodging_frequency: 6,
-      common_lodging: ["如家酒店", "7天连锁"],
-      shopping_habits: "线上线下结合",
-      payment_method: "支付宝",
-      entertainment_preferences: ["游戏", "电影"],
-      communication_frequency: 32,
-      channels_usage: "{\"微信\":25,\"电话\":7}",
-      total_duration: 850,
-      average_duration: 12,
-      sensitive_keywords: ["批发", "货源", "价格"],
-      active_duration: "不规律",
-      active_periods: ["下午", "深夜"],
-      interaction_topics: ["货物交易", "价格谈判", "物流安排"]
-    },
-    {
-      id: "9a2017e971915931e1d5b1e04bef9885",
-      name: "大刘-零售商",
-      label: "{\"network_account_id\":\"user6543219876\"}",
-      belongName: "test",
-      belongPhone: "1111",
-      gender: "男",
-      age: "31",
-      place_of_origin: "河南",
-      zodiac: "金牛座",
-      education: "高中",
-      id_number: null,
-      phone: "13765432198",
-      network_account_id: "user6543219876",
-      nicknames: ["大刘", "刘老板"],
-      permanent_address: "广东省东莞市长安镇",
-      temporary_address: null,
-      illegal_risks: [
-        "2025-03-26T14:22:33，与他人发生财物纠纷",
-        "2025-03-27T09:15:40，涉嫌销售违禁电子烟"
-      ],
-      consumption_level: "10万元",
-      has_car: true,
-      has_house: true,
-      has_loan: true,
-      loan_types: ["房贷", "车贷"],
-      transaction_count: 120,
-      expenditure_frequency: "频繁",
-      transaction_categories: ["电子设备", "餐饮", "服装"],
-      overdue_record_count: 0,
-      abnormal_transaction_count: 1,
-      sleep_pattern: "00:00-08:00",
-      common_transport: ["私家车"],
-      travel_frequency: 5,
-      mobility: "固定",
-      lodging_frequency: 1,
-      common_lodging: [],
-      shopping_habits: "线下为主",
-      payment_method: "微信支付",
-      entertainment_preferences: ["KTV", "麻将"],
-      communication_frequency: 28,
-      channels_usage: "{\"微信\":20,\"电话\":8}",
-      total_duration: 920,
-      average_duration: 18,
-      sensitive_keywords: ["货源", "进货", "价格"],
-      active_duration: "全天",
-      active_periods: ["上午", "晚间"],
-      interaction_topics: ["货物采购", "价格谈判", "销售策略"]
-    }
-  ],
-  edges: [
-    {
-      id: null,
-      source: "fda5a69cfbb7e2fd1e472791ba1615da",
-      target: "9c380b33883395b979817bfb020b2c0d",
-      type: "举报目标",
-      relation_detail: [
-        "2025年3月24日组织成员讨论'干掉魔叶'并提供举报奖励",
-        "2025年3月24日多次提及魔叶账号需清除"
-      ],
-      interaction_count: 6
-    },
-    {
-      id: null,
-      source: "2242a380e5bc603a411869a74b4eb09b",
-      target: "9a2017e971915931e1d5b1e04bef9885",
-      type: "财物纠纷",
-      relation_detail: [
-        "2025年3月26日争吵涉及货物抢夺及资金纠纷",
-        "双方使用侮辱性语言并威胁对方"
-      ],
-      interaction_count: 28
-    },
-    {
-      id: null,
-      source: "eb5925371be58caaaca53e1bedcb6afe",
-      target: "fda5a69cfbb7e2fd1e472791ba1615da",
-      type: "供货关系",
-      relation_detail: [
-        "2025年3月22日讨论电子烟油杆供应事宜",
-        "2025年3月23日确认发货数量及价格"
-      ],
-      interaction_count: 13
-    },
-    {
-      id: null,
-      source: "fda5a69cfbb7e2fd1e472791ba1615da",
-      target: "2242a380e5bc603a411869a74b4eb09b",
-      type: "批发关系",
-      relation_detail: [
-        "2025年3月25日商讨批发价格及数量",
-        "2025年3月25日安排物流配送事宜"
-      ],
-      interaction_count: 22
-    },
-    {
-      id: null,
-      source: "2242a380e5bc603a411869a74b4eb09b",
-      target: "eb5925371be58caaaca53e1bedcb6afe",
-      type: "咨询关系",
-      relation_detail: [
-        "2025年3月21日咨询电子烟油杆规格参数",
-        "2025年3月22日询问货源稳定性"
-      ],
-      interaction_count: 8
-    },
-    {
-      id: null,
-      source: "9a2017e971915931e1d5b1e04bef9885",
-      target: "9c380b33883395b979817bfb020b2c0d",
-      type: "投诉关系",
-      relation_detail: [
-        "2025年3月23日投诉魔叶产品质量问题",
-        "2025年3月25日要求退款或换货"
-      ],
-      interaction_count: 4
-    },
-    {
-      id: null,
-      source: "eb5925371be58caaaca53e1bedcb6afe",
-      target: "9c380b33883395b979817bfb020b2c0d",
-      type: "竞争关系",
-      relation_detail: [
-        "2025年3月22日贬低魔叶产品质量",
-        "2025年3月24日参与举报魔叶活动"
-      ],
-      interaction_count: 5
-    }
-  ]
+// 设置中文区域
+faker.locale = 'zh_CN';  // Changed from faker.setLocale('zh_CN')
+// 生成随机ID
+const generateRandomId = () => {
+  return faker.string.alphanumeric(24);
 };
 
-export default function(mock: MockAdapter) {
+// 生成随机手机号
+const generateRandomPhone = () => {
+  return `1${faker.number.int({ min: 3, max: 9 })}${faker.string.numeric(9)}`;
+};
+
+// 生成随机身份证号
+const generateRandomIdNumber = () => {
+  // 生成随机的18位身份证号
+  const areaCode = faker.location.zipCode('#####');
+  const birthYear = faker.date.birthdate({ min: 1960, max: 2000, mode: 'year' }).getFullYear();
+  const birthMonth = String(faker.number.int({ min: 1, max: 12 })).padStart(2, '0');
+  const birthDay = String(faker.number.int({ min: 1, max: 28 })).padStart(2, '0');
+  const sequence = faker.string.numeric(3);
+  const checkCode = faker.string.alphanumeric(1).toUpperCase();
+  
+  return `${areaCode}${birthYear}${birthMonth}${birthDay}${sequence}${checkCode}`;
+};
+
+// 生成随机微信ID
+const generateRandomWxId = () => {
+  return `wxid_${faker.string.alphanumeric(9)}`;
+};
+
+// 生成随机网络账号ID
+const generateRandomNetworkId = () => {
+  const prefix = faker.helpers.arrayElement(['用户', '小', '大', '老', '京城', '沪上', '粤', '川']);
+  const suffix = faker.person.lastName();
+  return `${prefix}${suffix}`;
+};
+
+// 生成随机地址
+const generateRandomAddress = () => {
+  return faker.location.city() + faker.location.street() + faker.location.buildingNumber();
+};
+
+// 生成随机学历
+const generateRandomEducation = () => {
+  return faker.helpers.arrayElement(['初中', '高中', '中专', '大专', '本科', '硕士', '博士', '未知']);
+};
+
+// 生成随机星座
+const generateRandomZodiac = () => {
+  return faker.helpers.arrayElement(['白羊座', '金牛座', '双子座', '巨蟹座', '狮子座', '处女座', '天秤座', '天蝎座', '射手座', '摩羯座', '水瓶座', '双鱼座']);
+};
+
+// 生成随机敏感词
+const generateRandomSensitiveKeywords = () => {
+  const keywords = [
+    '转账', '贷款', '借钱', '还钱', '欠款', '利息', '投资', '理财', 
+    '赌博', '博彩', '彩票', '赌场', '赌钱', '赢钱', '输钱',
+    '毒品', '货源', '白粉', '冰毒', '摇头丸', '大麻', 
+    '走私', '偷渡', '假证', '假钞', '洗钱', '黑钱',
+    '枪支', '弹药', '军火', '炸药', '爆炸物',
+    '色情', '小姐', '一夜情', '援交', '服务',
+    '诈骗', '骗钱', '骗局', '套路', '圈套',
+    '黑客', '攻击', '入侵', '病毒', '木马',
+    '偷税', '漏税', '逃税', '避税', '税务',
+    '非法集资', '传销', '直销', '拉人头', '下线',
+    '内幕', '消息', '股票', '内部', '暴涨'
+  ];
+  
+  const count = faker.number.int({ min: 0, max: 5 });
+  return faker.helpers.arrayElements(keywords, count);
+};
+
+// 生成随机活跃时段
+const generateRandomActivePeriods = () => {
+  const periods = ['凌晨', '早上', '上午', '中午', '下午', '傍晚', '晚上', '深夜', '工作日', '周末', '节假日'];
+  const count = faker.number.int({ min: 1, max: 3 });
+  return faker.helpers.arrayElements(periods, count);
+};
+
+// 生成随机交通方式
+const generateRandomTransport = () => {
+  const transport = ['私家车', '公交车', '地铁', '出租车', '网约车', '高铁', '飞机', '自行车', '电动车', '步行'];
+  const count = faker.number.int({ min: 1, max: 3 });
+  return faker.helpers.arrayElements(transport, count);
+};
+
+// 生成随机住宿地点
+const generateRandomLodging = () => {
+  const lodging = [
+    `${faker.location.city()}${faker.company.name()}酒店`,
+    `${faker.location.city()}${faker.company.name()}宾馆`,
+    `${faker.location.city()}${faker.company.name()}民宿`,
+    `${faker.location.city()}${faker.company.name()}公寓`
+  ];
+  const count = faker.number.int({ min: 0, max: 2 });
+  return faker.helpers.arrayElements(lodging, count);
+};
+
+// 生成随机娱乐偏好
+const generateRandomEntertainment = () => {
+  const entertainment = ['KTV', '电影', '游戏', '运动', '健身', '旅游', '购物', '美食', '读书', '音乐', '舞蹈', '绘画', '摄影', '钓鱼', '棋牌', '麻将', '赌博'];
+  const count = faker.number.int({ min: 0, max: 4 });
+  return faker.helpers.arrayElements(entertainment, count);
+};
+
+// 生成随机交互主题
+const generateRandomInteractionTopics = () => {
+  const topics = ['投资', '旅行', '工作', '学习', '家庭', '健康', '娱乐', '购物', '美食', '运动', '时事', '政治', '科技', '艺术', '文化', '宗教', '哲学', '心理', '情感', '社交'];
+  const count = faker.number.int({ min: 0, max: 3 });
+  return faker.helpers.arrayElements(topics, count);
+};
+
+// 生成随机通信渠道使用情况
+const generateRandomChannelsUsage = () => {
+  const channels = {
+    '手机': faker.number.int({ min: 0, max: 200 }),
+    '短信': faker.number.int({ min: 0, max: 100 }),
+    '微信': faker.number.int({ min: 0, max: 300 }),
+    'QQ': faker.number.int({ min: 0, max: 100 }),
+    '邮件': faker.number.int({ min: 0, max: 50 }),
+    '电报': faker.number.int({ min: 0, max: 30 }),
+    'WhatsApp': faker.number.int({ min: 0, max: 20 })
+  };
+  
+  // 随机选择2-4个通信渠道
+  const selectedChannels = {};
+  const channelKeys = Object.keys(channels);
+  const selectedKeys = faker.helpers.arrayElements(channelKeys, faker.number.int({ min: 2, max: 4 }));
+  
+  selectedKeys.forEach(key => {
+    selectedChannels[key] = channels[key];
+  });
+  
+  return selectedChannels;
+};
+
+// 生成随机非法风险
+const generateRandomIllegalRisks = () => {
+  const risks = [
+    `${faker.date.recent({ days: 365 }).toISOString().split('T')[0]}，嫌疑人通过${faker.helpers.arrayElement(['支付宝', '微信', '银行卡'])}转账向账号X支付${faker.number.int({ min: 1, max: 10 })}万元，涉及电信网络诈骗活动`,
+    `${faker.date.recent({ days: 365 }).toISOString().split('T')[0]}，嫌疑人在${faker.location.city()}${faker.location.street()}进行可疑交易，疑似毒品交易`,
+    `${faker.date.recent({ days: 365 }).toISOString().split('T')[0]}，嫌疑人在${faker.location.city()}${faker.location.street()}与多名嫌疑人会面，疑似组织犯罪活动`,
+    `${faker.date.recent({ days: 365 }).toISOString().split('T')[0]}，嫌疑人通过${faker.helpers.arrayElement(['支付宝', '微信', '银行卡'])}收款${faker.number.int({ min: 1, max: 10 })}万元，资金来源不明`,
+    `${faker.date.recent({ days: 365 }).toISOString().split('T')[0]}，嫌疑人在${faker.location.city()}${faker.location.street()}与境外人员接触，疑似间谍活动`,
+    `${faker.date.recent({ days: 365 }).toISOString().split('T')[0]}，嫌疑人在${faker.location.city()}${faker.location.street()}进行可疑交易，疑似走私活动`,
+    `${faker.date.recent({ days: 365 }).toISOString().split('T')[0]}，嫌疑人在${faker.location.city()}${faker.location.street()}与多名嫌疑人会面，疑似传销活动`,
+    `${faker.date.recent({ days: 365 }).toISOString().split('T')[0]}，嫌疑人通过${faker.helpers.arrayElement(['支付宝', '微信', '银行卡'])}转账向账号X支付${faker.number.int({ min: 1, max: 10 })}万元，疑似赌博活动`,
+    `${faker.date.recent({ days: 365 }).toISOString().split('T')[0]}，嫌疑人在${faker.location.city()}${faker.location.street()}进行可疑交易，疑似非法集资活动`,
+    `${faker.date.recent({ days: 365 }).toISOString().split('T')[0]}，嫌疑人通过${faker.helpers.arrayElement(['支付宝', '微信', '银行卡'])}收款${faker.number.int({ min: 1, max: 10 })}万元，疑似洗钱活动`
+  ];
+  
+  const count = faker.number.int({ min: 0, max: 3 });
+  return faker.helpers.arrayElements(risks, count);
+};
+
+// 生成随机关系类型
+const generateRandomRelationType = () => {
+  return faker.helpers.arrayElement([
+    '转账关系', '同行关系', '同住关系', '通话关系', '短信关系', '微信关系', 
+    '亲属关系', '朋友关系', '同事关系', '上下级关系', '师生关系', '同学关系',
+    '商业关系', '供应商关系', '客户关系', '合作关系', '竞争关系', '敌对关系',
+    '情侣关系', '夫妻关系', '前任关系', '暧昧关系', '单相思关系',
+    '债权债务关系', '借贷关系', '担保关系', '抵押关系', '质押关系',
+    '犯罪关系', '共犯关系', '从犯关系', '主犯关系', '教唆关系', '帮助关系',
+    '上下游关系', '同伙关系', '同案关系', '同监关系', '同狱关系',
+    '举报关系', '投诉关系', '控告关系', '诉讼关系', '调解关系',
+    '同房间', '同车辆', '同航班', '同车次', '同船次', '同酒店'
+  ]);
+};
+
+// 生成随机关系详情
+const generateRandomRelationDetail = (relationType) => {
+  const details = {
+    '转账关系': [
+      `${faker.date.recent({ days: 365 }).toISOString().split('T')[0]}，通过${faker.helpers.arrayElement(['支付宝', '微信', '银行卡'])}转账${faker.number.int({ min: 1, max: 10 })}次，共计${faker.number.int({ min: 1000, max: 100000 })}元`,
+      `备注为'${faker.helpers.arrayElement(['借款', '还账', '投资', '分红', '报销', '工资', '红包', '礼金', '赔偿', '赎金'])}'`
+    ],
+    '同行关系': [
+      `${faker.date.recent({ days: 365 }).toISOString().split('T')[0]}，共同乘坐${faker.helpers.arrayElement(['飞机', '高铁', '汽车', '出租车', '网约车'])}前往${faker.location.city()}`,
+      `行程持续${faker.number.int({ min: 1, max: 10 })}天，期间有${faker.number.int({ min: 1, max: 10 })}次共同活动`
+    ],
+    '同住关系': [
+      `${faker.date.recent({ days: 365 }).toISOString().split('T')[0]}至${faker.date.recent({ days: 300 }).toISOString().split('T')[0]}，共同入住${faker.location.city()}${faker.company.name()}酒店${faker.number.int({ min: 1, max: 5 })}次`,
+      `使用${faker.helpers.arrayElement(['统一身份证登记', '不同身份证登记'])}，房号${faker.helpers.arrayElement(['相同', '相邻'])}`
+    ],
+    '通话关系': [
+      `${faker.date.recent({ days: 365 }).toISOString().split('T')[0]}至${faker.date.recent({ days: 300 }).toISOString().split('T')[0]}，通话${faker.number.int({ min: 1, max: 100 })}次，总时长${faker.number.int({ min: 10, max: 1000 })}分钟`,
+      `通话频率为${faker.helpers.arrayElement(['每天', '每周', '每月', '不定期'])}，通话时间集中在${faker.helpers.arrayElement(['早上', '中午', '下午', '晚上', '深夜'])}`
+    ],
+    '微信关系': [
+      `${faker.date.recent({ days: 365 }).toISOString().split('T')[0]}至${faker.date.recent({ days: 300 }).toISOString().split('T')[0]}，微信聊天${faker.number.int({ min: 1, max: 1000 })}次，发送消息${faker.number.int({ min: 10, max: 10000 })}条`,
+      `聊天内容涉及${faker.helpers.arrayElement(['工作', '生活', '情感', '金钱', '交易', '犯罪', '政治', '宗教', '色情', '赌博', '毒品'])}`
+    ]
+  };
+  
+  // 如果没有特定类型的详情，生成通用详情
+  if (!details[relationType]) {
+    return [
+      `${faker.date.recent({ days: 365 }).toISOString().split('T')[0]}，${faker.lorem.sentence()}`,
+      `${faker.date.recent({ days: 300 }).toISOString().split('T')[0]}，${faker.lorem.sentence()}`
+    ];
+  }
+  
+  return details[relationType];
+};
+
+// 生成随机消息交换
+const generateRandomMessageExchange = (source, target) => {
+  const count = faker.number.int({ min: 3, max: 10 });
+  const messages = [];
+  
+  for (let i = 0; i < count; i++) {
+    const sender = faker.helpers.arrayElement([source, target]);
+    const receiver = sender === source ? target : source;
+    
+    messages.push({
+      sender,
+      receiver,
+      content: faker.lorem.sentence(),
+      time: faker.date.recent({ days: 365 }).toISOString()
+    });
+  }
+  
+  return messages;
+};
+
+// 生成随机节点
+const generateRandomNode = (isFullInfo = false) => {
+  const id = isFullInfo ? generateRandomIdNumber() : generateRandomPhone();
+  const networkAccountId = generateRandomNetworkId();
+  
+  // 基本信息
+  const node = {
+    id,
+    label: {
+      oneID: isFullInfo ? generateRandomPhone() : id,
+      UnionID: isFullInfo ? generateRandomWxId() : ""
+    },
+    properties: {
+      name: isFullInfo ? faker.person.fullName() : "",
+      network_account_id: networkAccountId,
+      network_account_name: networkAccountId.substring(networkAccountId.length - 2),
+      nicknames: isFullInfo ? [faker.person.lastName() + faker.helpers.arrayElement(['哥', '弟', '姐', '妹'])] : [networkAccountId.substring(networkAccountId.length - 2)],
+      phone: isFullInfo ? generateRandomPhone() : id
+    }
+  };
+  
+  // 如果需要完整信息，添加更多属性
+  if (isFullInfo) {
+    Object.assign(node.properties, {
+      gender: faker.helpers.arrayElement(['男', '女']),
+      age: String(faker.number.int({ min: 18, max: 70 })),
+      place_of_origin: faker.location.city(),
+      zodiac: generateRandomZodiac(),
+      education: generateRandomEducation(),
+      id_number: id,
+      phone2: faker.helpers.arrayElement([generateRandomPhone(), ""]),
+      holder_number: faker.helpers.arrayElement([generateRandomPhone(), ""]),
+      document_type: "身份证",
+      document_number: id,
+      device_type: faker.helpers.arrayElement(['手机', '平板', '电脑']),
+      phone_brand: faker.helpers.arrayElement(['iPhone', '华为', '小米', 'OPPO', 'vivo', '三星']),
+      device_model: faker.helpers.arrayElement(['iPhone 13', 'iPhone 14', 'Mate 40', 'P40', 'Mi 12', 'Find X5']),
+      "IMEI/MEID": faker.helpers.arrayElement([faker.string.numeric(15), ""]),
+      IMSI: faker.helpers.arrayElement([faker.string.numeric(15), ""]),
+      ICCID: faker.helpers.arrayElement([faker.string.numeric(19), ""]),
+      permanent_address: generateRandomAddress(),
+      temporary_address: faker.helpers.arrayElement([generateRandomAddress(), ""]),
+      marital_status: faker.helpers.arrayElement(['未婚', '已婚', '离异', '丧偶']),
+      has_children: faker.datatype.boolean(),
+      family_structure: faker.helpers.arrayElement(['核家庭', '大家庭', '单亲家庭', '重组家庭']),
+      family_criminal_records: faker.helpers.arrayElement([["配偶曾涉赌"], ["父亲曾涉毒"], ["兄弟曾涉盗窃"], []]),
+      illegal_risks: generateRandomIllegalRisks(),
+      consumption_level: faker.helpers.arrayElement([`${faker.number.int({ min: 1, max: 100 })}万元`, ""]),
+      has_car: faker.datatype.boolean(),
+      has_house: faker.datatype.boolean(),
+      has_loan: faker.datatype.boolean(),
+      loan_types: faker.helpers.arrayElement([["消费贷款", "汽车贷款"], ["房贷"], ["经营贷款"], []]),
+      transaction_count: faker.number.int({ min: 0, max: 500 }),
+      expenditure_frequency: faker.helpers.arrayElement(['频繁', '中等', '较少', '极少']),
+      transaction_categories: faker.helpers.arrayElements(['餐饮', '购物', '娱乐', '交通', '住宿', '医疗', '教育', '通信', '金融'], faker.number.int({ min: 0, max: 5 })),
+      overdue_record_count: faker.number.int({ min: 0, max: 10 }),
+      abnormal_transaction_count: faker.number.int({ min: 0, max: 5 }),
+      sleep_pattern: faker.helpers.arrayElement(['22:00-06:00', '23:00-07:00', '00:00-08:00', '01:00-09:00', '不规律']),
+      common_transport: generateRandomTransport(),
+      travel_frequency: faker.number.int({ min: 0, max: 50 }),
+      mobility: faker.helpers.arrayElement(['固定', '流动', '高度流动']),
+      lodging_frequency: faker.number.int({ min: 0, max: 30 }),
+      common_lodging: generateRandomLodging(),
+      shopping_habits: faker.helpers.arrayElement(['网购为主', '线下为主', '网购线下结合', '每月初大额消费', '节假日消费', '不规律消费']),
+      payment_method: faker.helpers.arrayElement(['支付宝', '微信', '银行卡', '现金', '信用卡']),
+      entertainment_preferences: generateRandomEntertainment(),
+      communication_frequency: faker.number.int({ min: 0, max: 500 }),
+      channels_usage: generateRandomChannelsUsage(),
+      total_duration: faker.number.int({ min: 0, max: 10000 }),
+      average_duration: faker.number.int({ min: 0, max: 60 }),
+      sensitive_keywords: generateRandomSensitiveKeywords(),
+      active_duration: faker.helpers.arrayElement(['1小时', '2小时', '3小时', '4小时', '5小时', '全天', '不规律']),
+      active_periods: generateRandomActivePeriods(),
+      interaction_topics: generateRandomInteractionTopics(),
+      interaction_count: faker.number.int({ min: 0, max: 25 }),
+      network_info: [
+        {
+          "WIFI名称": `${faker.company.name()}WiFi`,
+          "MAC地址": `${faker.string.hexadecimal({ length: 12, casing: 'mixed', prefix: '' }).match(/.{1,2}/g).join(':')}`,
+          "连接时间": faker.date.recent({ days: 30 }).toISOString().replace('T', ' ').substring(0, 19)
+        }
+      ]
+    });
+  }
+  
+  return node;
+};
+
+// 生成随机关系
+const generateRandomRelationship = (source, target) => {
+  const relationType = generateRandomRelationType();
+  
+  return {
+    source,
+    target,
+    type: relationType,
+    properties: {
+      relation_detail: generateRandomRelationDetail(relationType),
+      interaction_count: faker.number.int({ min: 1, max: 25 })
+    }
+  };
+};
+
+// 生成随机图数据
+const generateRandomGraphData = (nodeCount = 50, edgeCount = 100) => {
+  // 生成节点
+  const nodes = [];
+  for (let i = 0; i < nodeCount; i++) {
+    nodes.push(generateRandomNode(i < nodeCount * 0.3)); // 30%的节点有完整信息
+  }
+  
+  // 生成边
+  const edges = [];
+  const messageExchanges = [];
+  
+  for (let i = 0; i < edgeCount; i++) {
+    const sourceIndex = faker.number.int({ min: 0, max: nodes.length - 1 });
+    let targetIndex;
+    do {
+      targetIndex = faker.number.int({ min: 0, max: nodes.length - 1 });
+    } while (targetIndex === sourceIndex);
+    
+    const source = nodes[sourceIndex].id;
+    const target = nodes[targetIndex].id;
+    
+    // 检查是否已存在相同的边
+    const edgeExists = edges.some(edge => 
+      (edge.source === source && edge.target === target) || 
+      (edge.source === target && edge.target === source)
+    );
+    
+    if (!edgeExists) {
+      edges.push(generateRandomRelationship(source, target));
+      
+      // 为部分边生成消息交换
+      if (faker.datatype.boolean()) {
+        const messages = generateRandomMessageExchange(source, target);
+        messageExchanges.push(...messages);
+      }
+    }
+  }
+  
+  return {
+    graph_data: {
+      nodes,
+      relationships: edges,
+      message_exchange: messageExchanges
+    }
+  };
+};
+
+// 模拟知识图谱数据
+const mockGraphData = generateRandomGraphData(50, 100);
+
+// 转换为前端需要的格式
+const convertToFrontendFormat = (data) => {
+  const nodes = data.graph_data.nodes.map(node => ({
+    id: node.id,
+    name: node.properties.name || node.properties.network_account_id,
+    label: JSON.stringify(node.label),
+    belongName: "test",
+    belongPhone: "1111",
+    ...node.properties
+  }));
+  
+  const edges = data.graph_data.relationships.map(rel => ({
+    id: null,
+    source: rel.source,
+    target: rel.target,
+    type: rel.type,
+    relation_detail: rel.properties.relation_detail,
+    interaction_count: rel.properties.interaction_count
+  }));
+  
+  return { nodes, edges };
+};
+
+const frontendGraphData = convertToFrontendFormat(mockGraphData);
+
+// 导出这些函数以便直接使用
+export { generateRandomGraphData, convertToFrontendFormat, frontendGraphData };
+
+// 获取前端格式的图数据
+export function getFrontendGraphData() {
+  return frontendGraphData;
+}
+
+export default function(mock) {
+  // 确保 mock 对象存在
+  if (!mock) {
+    console.error('Mock adapter is undefined');
+    return;
+  }
+  
   // 获取知识图谱数据
   mock.onGet('/api/knowledge-graph/data').reply(200, {
     code: 200,
-    data: mockGraphData,
+    data: frontendGraphData,
     message: '获取知识图谱数据成功'
   });
   
-  // 获取知识图谱节点详情
-  mock.onGet(new RegExp('/api/knowledge-graph/node/.*')).reply((config) => {
-    const nodeId = config.url.split('/').pop();
-    const node = mockGraphData.nodes.find(n => n.id === nodeId);
-    
-    if (node) {
-      return [200, {
-        code: 200,
-        data: node,
-        message: '获取节点详情成功'
-      }];
-    } else {
-      return [404, {
-        code: 404,
-        data: null,
-        message: '未找到节点信息'
-      }];
-    }
-  });
-  
-  // 获取知识图谱边详情
-  mock.onGet(new RegExp('/api/knowledge-graph/edge/.*')).reply((config) => {
-    const params = new URLSearchParams(config.url.split('?')[1]);
-    const source = params.get('source');
-    const target = params.get('target');
-    
-    const edge = mockGraphData.edges.find(e => 
-      e.source === source && e.target === target
-    );
-    
-    if (edge) {
-      return [200, {
-        code: 200,
-        data: edge,
-        message: '获取关系详情成功'
-      }];
-    } else {
-      return [404, {
-        code: 404,
-        data: null,
-        message: '未找到关系信息'
-      }];
-    }
-  });
-  
-  // 获取知识图谱统计信息
-  mock.onGet('/api/knowledge-graph/stats').reply(200, {
+  // 根据手机号获取知识图谱数据
+  mock.onGet(new RegExp('/api/knowledge-graph/data/.*')).reply(200, {
     code: 200,
-    data: {
-      nodeCount: mockGraphData.nodes.length,
-      edgeCount: mockGraphData.edges.length,
-      nodeTypes: {
-        "销售商": 2,
-        "批发商": 1,
-        "零售商": 1,
-        "品牌": 1
-      },
-      edgeTypes: {
-        "举报目标": 1,
-        "财物纠纷": 1,
-        "供货关系": 1,
-        "批发关系": 1,
-        "咨询关系": 1,
-        "投诉关系": 1,
-        "竞争关系": 1
-      },
-      riskLevels: {
-        "高风险": 2,
-        "中风险": 2,
-        "低风险": 1
-      }
-    },
-    message: '获取知识图谱统计信息成功'
+    data: frontendGraphData,
+    message: '获取知识图谱数据成功'
   });
 }

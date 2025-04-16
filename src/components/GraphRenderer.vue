@@ -193,7 +193,7 @@ const updateGraph = () => {
     .join((enter) => 
       enter 
         .append('line') 
-        .attr('stroke-width', (d) => Math.max(1, safeNumber(d.interaction_count, 1))) 
+        .attr('stroke-width', (d) => 2) 
         .attr('stroke', (d) => {
           const opt = props.filterTypes['relationTypes'].filterConfig?.options.find(o => o.value === d.type)
           return opt ? opt.color : '#999'

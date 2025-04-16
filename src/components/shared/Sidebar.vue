@@ -3,6 +3,7 @@ import { ref, computed, watch } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 // 导入需要使用的图标组件
 import { House, Monitor, Folder, Connection } from '@element-plus/icons-vue';
+import { aiPoliceAssistants, getFullPath } from '@/config/aiAssistants';
 
 const router = useRouter();
 const route = useRoute();
@@ -19,38 +20,34 @@ const isTextOverflow = (text: string) => {
   return text.length > 15;
 };
 
+// 使用统一配置生成AI警察子菜单
+const aiPoliceChildren = aiPoliceAssistants.map(assistant => ({
+  title: assistant.title,
+  index: getFullPath(assistant.path)
+}));
+
 const menuItems = [
   {
     title: '首页',
-    icon: House,  // 直接使用导入的组件对象，而不是字符串
+    icon: House,
     index: '/',
     children: []
   },
   {
     title: 'AI警察',
-    icon: Monitor,  // 直接使用导入的组件对象
+    icon: Monitor,
     index: '/ai-police',
-    children: [
-      { title: '案情审查助手', index: '/ai-police/case-review' },
-      { title: '法律咨询助手', index: '/ai-police/legal-consultant' },
-      { title: '文件检察官', index: '/ai-police/text-review' },
-      { title: '案件异常资金分析', index: '/ai-police/financial-analysis' },
-      { title: '案件社会活动轨迹', index: '/ai-police/social-activity' },
-      { title: '通信记录挖掘助手', index: '/ai-police/chat-review' },
-      { title: '案件社会活动轨迹分析助手-文件上传版本', index: '/ai-police/social-activity-assistant' },
-      { title: '通信记录挖掘助手-文件上传版', index: '/ai-police/chat-review-file' },
-      { title: '案件异常资金分析助手-文件上传版', index: '/ai-police/financial-analysis-tool' },
-    ]
+    children: aiPoliceChildren
   },
   {
     title: '知识库管理',
-    icon: Folder,  // 直接使用导入的组件对象
+    icon: Folder,
     index: '/knowledge-base',
     children: []
   },
   {
     title: '知识图谱',
-    icon: Connection,  // 直接使用导入的组件对象
+    icon: Connection,
     index: '/knowledge-graph',
     children: []
   }
@@ -174,6 +171,7 @@ const toggleCollapse = () => {
   bottom: 0;
   z-index: 1000;
   box-shadow: 0 0 15px rgba(0, 0, 0, 0.05);
+  overflow: hidden; // 防止内容溢出
   
   &.is-collapsed {
     width: 80px;
@@ -191,11 +189,24 @@ const toggleCollapse = () => {
   padding: 0 20px;
   background-color: #fff;
   border-bottom: 1px solid #f0f0f0;
+  position: relative; // 添加相对定位
+  
+  &::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 10%;
+    right: 10%;
+    height: 1px;
+    background: linear-gradient(to right, transparent, #e0e0e0, transparent);
+  }
   
   .logo {
     width: 36px;
     height: 36px;
     margin-right: 14px;
+    transition: all 0.3s ease;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1)); // 添加阴影效果
   }
   
   .title {
@@ -205,6 +216,8 @@ const toggleCollapse = () => {
     white-space: nowrap;
     overflow: hidden;
     letter-spacing: 1px;
+    transition: all 0.3s ease;
+    text-shadow: 0 1px 2px rgba(24, 144, 255, 0.1); // 添加文字阴影
   }
 }
 
@@ -213,13 +226,27 @@ const toggleCollapse = () => {
   border-right: none;
   padding-top: 16px;
   overflow-y: auto; // 允许菜单滚动
+  
+  // 美化滚动条
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+  
+  &::-webkit-scrollbar-thumb {
+    background-color: rgba(0, 0, 0, 0.1);
+    border-radius: 3px;
+  }
+  
+  &::-webkit-scrollbar-track {
+    background-color: transparent;
+  }
 }
 
 .collapse-btn {
   height: 40px;
   width: 40px;
   position: fixed; // 改为fixed定位
-  top: 10px;
+  top: 15px; // 稍微下移一点
   left: 260px; // 默认位置
   cursor: pointer;
   text-align: center;
@@ -233,36 +260,51 @@ const toggleCollapse = () => {
   align-items: center;
   justify-content: center;
   transition: all 0.3s ease;
+  border: 1px solid rgba(24, 144, 255, 0.2); // 添加边框
   
   &:hover {
     transform: scale(1.1);
     background-color: #1890ff;
     color: #fff;
+    box-shadow: 0 4px 12px rgba(24, 144, 255, 0.3); // 悬停时增强阴影
   }
   
   &.sidebar-hidden {
-    left: 0px; // 侧边栏隐藏时按钮位置
+    left: 10px; // 侧边栏隐藏时按钮位置
+  }
+  
+  .el-icon {
+    font-size: 18px;
+    transition: all 0.3s ease;
   }
 }
 
 :deep(.el-menu) {
   border-right: none;
+  background-color: transparent; // 确保菜单背景透明
 }
 
 :deep(.el-menu-item), :deep(.el-sub-menu__title) {
   height: 60px;
   line-height: 60px;
-  font-size: 17px;
+  font-size: 16px; // 稍微减小字体
   letter-spacing: 0.8px;
   padding: 0 !important;
+  margin: 4px 0; // 添加上下间距
+  border-radius: 0 24px 24px 0; // 右侧圆角
+  margin-right: 16px; // 右侧留出空间
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); // 平滑过渡
+  
   .el-icon {
-    font-size: 22px;
+    font-size: 20px;
     margin-right: 12px;
+    transition: all 0.3s ease;
   }
   
   &:hover {
     background-color: #e6f7ff !important;
     color: #1890ff !important;
+    transform: translateX(4px); // 悬停时轻微右移
   }
 }
 
@@ -270,6 +312,7 @@ const toggleCollapse = () => {
   background-color: #e6f7ff !important;
   color: #1890ff !important;
   position: relative;
+  font-weight: 500; // 激活项加粗
   
   &::before {
     content: '';
@@ -279,6 +322,8 @@ const toggleCollapse = () => {
     bottom: 0;
     width: 4px;
     background-color: #1890ff;
+    border-radius: 0 2px 2px 0; // 右侧圆角
+    box-shadow: 0 0 8px rgba(24, 144, 255, 0.5); // 添加发光效果
   }
 }
 
@@ -286,6 +331,7 @@ const toggleCollapse = () => {
   .el-sub-menu__title {
     color: #1890ff !important;
     background-color: #e6f7ff !important;
+    font-weight: 500; // 激活项加粗
     
     &::before {
       content: '';
@@ -295,6 +341,8 @@ const toggleCollapse = () => {
       bottom: 0;
       width: 4px;
       background-color: #1890ff;
+      border-radius: 0 2px 2px 0; // 右侧圆角
+      box-shadow: 0 0 8px rgba(24, 144, 255, 0.5); // 添加发光效果
     }
   }
 }
@@ -306,11 +354,14 @@ const toggleCollapse = () => {
     background-color: #e6f7ff !important;
     color: #1890ff !important;
   }
-}.submenu-content {
+}
+
+.submenu-content {
   display: flex;
   align-items: center;
-  font-size: 16px;
+  font-size: 15px; // 稍微减小字体
   width: 100%;
+  transition: all 0.3s ease;
 }
 
 .submenu-indicator {
@@ -319,8 +370,10 @@ const toggleCollapse = () => {
   border-radius: 50%;
   background-color: #bbb;
   margin-right: 10px;
-  margin-left: 8px;
+  margin-left: 12px; // 增加左侧间距
   flex-shrink: 0;
+  transition: all 0.3s ease;
+  opacity: 0.7; // 降低默认状态的不透明度
 }
 
 .menu-text-ellipsis {
@@ -328,16 +381,33 @@ const toggleCollapse = () => {
   overflow: hidden;
   text-overflow: ellipsis;
   max-width: 160px;
+  transition: all 0.3s ease;
 }
 
 :deep(.submenu-item) {
   padding-left: 40px !important;
   height: 50px !important;
   line-height: 50px !important;
+  margin: 2px 0; // 减小子菜单项的间距
   
   &.is-active {
     .submenu-indicator {
       background-color: #1890ff;
+      transform: scale(1.2); // 激活时稍微放大
+      opacity: 1; // 激活时完全不透明
+      box-shadow: 0 0 4px rgba(24, 144, 255, 0.5); // 添加发光效果
+    }
+    
+    .menu-text-ellipsis {
+      color: #1890ff;
+      font-weight: 500; // 激活的文本加粗
+    }
+  }
+  
+  &:hover {
+    .submenu-indicator {
+      transform: scale(1.1); // 悬停时稍微放大
+      opacity: 0.9; // 悬停时增加不透明度
     }
   }
 }
@@ -366,7 +436,7 @@ const toggleCollapse = () => {
     left: 220px;
     
     &.sidebar-hidden {
-      left: 0px;
+      left: 10px; // 保持一致的隐藏位置
     }
   }
 }

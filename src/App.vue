@@ -27,6 +27,12 @@ const showSidebar = computed(() => {
 const isCollapse = computed(() => {
   return sidebarRef.value?.isCollapse || false;
 });
+
+// 定义需要缓存的组件名称列表
+const cachedViews = computed(() => {
+  // 从路由配置中获取所有需要缓存的组件名称
+  return ['AIPolice', 'KnowledgeBase', 'KnowledgeGraph', 'AIAssistantTemplate'];
+});
 </script>
 <template>
     <el-container>
@@ -38,7 +44,12 @@ const isCollapse = computed(() => {
                 <Sidebar ref="sidebarRef" />
             </el-aside>
             <el-main class="main">
-                <RouterView />
+                <!-- 修改 keep-alive 实现方式 -->
+                <router-view v-slot="{ Component }">
+                  <keep-alive :include="cachedViews">
+                    <component :is="Component" />
+                  </keep-alive>
+                </router-view>
                 <!-- <br /> -->
                 <!-- <ServiceWorker /> -->
                 <!-- <br />

@@ -7,6 +7,9 @@ import NodeContextMenu from '@/components/NodeContextMenu.vue'
 import GraphFilters from '@/components/GraphFilters.vue'
 import NodeDetailContainer from '@/components/NodeDetailContainer.vue'
 
+// 检查是否启用了模拟数据
+const isMockEnabled = import.meta.env.VITE_ENABLE_MOCK === 'true'
+
 const ROLES = ['suspect', 'victim', 'witness', 'neutral'] as const
 
 function getColorForRelation(str: string): string {
@@ -290,7 +293,10 @@ const queryParams = ref({
 })
 
 onMounted(async () => {
-  // await getGraphyDataByPhone()
+  // 如果启用了模拟数据，自动加载图谱数据
+  if (isMockEnabled) {
+    await getGraphyDataByPhone()
+  }
 })
 
 // 获取图数据
@@ -300,8 +306,27 @@ const getGraphyDataByPhone = async () => {
     const currentParams = {...queryParams.value}
     console.log("这里是最终查询", currentParams);
     
-    // 使用当前参数对象进行查询
-    const { data } = await fetchGraphData(currentParams)
+    let data
+    
+    // 根据环境变量决定是否使用模拟数据
+    if (isMockEnabled) {
+      console.log('使用模拟数据')
+      // 修改这部分代码，直接导入模拟数据
+      try {
+        // 直接导入模拟数据模块
+        const mockModule = await import('@/api/mock/modules/knowledgeGraph')
+        // 直接使用导出的前端格式数据
+        data = mockModule.frontendGraphData
+      } catch (error) {
+        console.error('导入模拟数据失败', error)
+        ElMessage.error('获取知识图谱数据失败')
+        return
+      }
+    } else {
+      // 使用真实 API
+      const result = await fetchGraphData(currentParams)
+      data = result.data
+    }
     
     const { nodes = [], edges = [] } = (data || {}) as {
       nodes?: Partial<GraphNode>[]
