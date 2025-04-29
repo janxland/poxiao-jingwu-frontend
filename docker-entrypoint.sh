@@ -7,5 +7,5 @@ if [ ! -z "$VITE_BACKEND_URL" ]; then
   find /app/dist -type f -name "*.js" -exec sed -i "s|VITE_BACKEND_URL:\"[^\"]*\"|VITE_BACKEND_URL:\"$VITE_BACKEND_URL\"|g" {} \;
 fi
 
-# 启动预览服务
-exec pnpm preview --port 9000 --host
+# 执行传入的命令
+exec "$@"
